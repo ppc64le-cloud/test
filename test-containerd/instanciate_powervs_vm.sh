@@ -47,6 +47,9 @@ if [ -z $NETWORK ]; then echo "FAIL: Network not fulfilled."; usage; exit 1; fi
 
 # Create a machine
 ibmcloud pi instance-create $NAME --image ubuntu_2004_containerd --key-name $SSH_KEY --memory 2 --processor-type shared --processors '0.25' --network $NETWORK --storage-type tier3
+if [ "$?" != "0" ]; then
+  echo "FAIL: fail to instanciate a VM"
+fi
 
 # Wait it is registred
 sleep 60
