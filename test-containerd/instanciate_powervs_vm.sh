@@ -73,6 +73,8 @@ IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut 
 
 # Check if the server is up
 # Typical time needed: 1 to 3 minutes
+sleep 150
+
 TIMEOUT=10
 i=0
 mkdir -p ~/.ssh
