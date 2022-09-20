@@ -54,6 +54,7 @@ script/setup/install-cni $(grep containernetworking/plugins go.mod | awk '{print
 script/setup/install-critools
 script/setup/install-failpoint-binaries
 script/setup/install-gotestsum
+script/setup/config-containerd
 unset GOFLAGS
 
 export GOPROXY="direct"
@@ -64,13 +65,14 @@ make binaries GO_BUILD_FLAGS="-mod=vendor"
 make install
 unset CGO_ENABLED
 
+echo "==== INTEGRATION TEST ===="
+GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-integration1_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.timeout 30m" make integration $TEST_FLAG TESTFLAGS_RACE=-race
+GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-integration2_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.timeout 30m" TESTFLAGS_PARALLEL=1 make integration $TEST_FLAG
+GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-cri-integration_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.timeout 30m" CONTAINERD_RUNTIME=$TEST_RUNTIME make cri-integration
+
 echo "==== TEST ===="
 GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-simple_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.timeout 30m" make test
 echo "==== ROOT-TEST ===="
 GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-root_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.parallel 1 -test.timeout 30m" make root-test
 
-echo "==== INTEGRATION TEST ===="
-GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-integration1_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.timeout 30m" make integration $TEST_FLAG TESTFLAGS_RACE=-race
-GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-integration2_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.timeout 30m" TESTFLAGS_PARALLEL=1 make integration $TEST_FLAG
-GOTEST='gotestsum --' GOTESTSUM_JUNITFILE="junit_test-cri-integration_$RUNC_FLAVOR-$TEST_RUNTIME.xml" EXTRA_TESTFLAGS="-test.timeout 30m" CONTAINERD_RUNTIME=$TEST_RUNTIME make cri-integration
 echo "==== END $RUNC_FLAVOR RUNTIME $TEST_RUNTIME ===="

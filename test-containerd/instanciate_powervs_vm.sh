@@ -47,7 +47,7 @@ if [ -z $NETWORK ]; then echo "FAIL: Network not fulfilled."; usage; exit 1; fi
 
 # Create a machine
 # Sometime fail, but the machine is correctly instanciated
-ibmcloud pi instance-create $NAME --image ubuntu_2004_containerd --key-name $SSH_KEY --memory 2 --processor-type shared --processors '0.25' --network $NETWORK --storage-type tier3 || true
+ibmcloud pi instance-create $NAME --image ubuntu_2004_containerd --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --network $NETWORK --storage-type tier3 || true
 
 # Wait it is registred
 sleep 120
@@ -73,6 +73,8 @@ IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut 
 
 # Check if the server is up
 # Typical time needed: 1 to 3 minutes
+sleep 150
+
 TIMEOUT=10
 i=0
 mkdir -p ~/.ssh
