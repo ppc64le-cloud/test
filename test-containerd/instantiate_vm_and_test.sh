@@ -72,8 +72,7 @@ if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; exit 1; fi
 IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut -d ' ' -f3)
 
 # Check if the server is up
-# Typical time needed: 1 to 3 minutes
-sleep 150
+sleep 360
 
 TIMEOUT=10
 i=0
