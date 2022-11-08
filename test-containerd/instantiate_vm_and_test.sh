@@ -25,6 +25,14 @@ Options:
 EOF
 }
 
+function delete_vm() {
+  if [ -z $1 ]; then echo "Nothing to delete. delete_vm requires the vm ID as an argument."; return; fi
+
+  # Ensure we are yet connected
+  echo "" | ibmcloud login
+  # Remove machine after test
+  ibmcloud pi instance-delete $1
+}
 
 # Get options
 while [[ $# != 0 ]]; do
@@ -47,12 +55,13 @@ if [ -z $NETWORK ]; then echo "FAIL: Network not fulfilled."; usage; exit 1; fi
 
 # Create a machine
 # Sometime fail, but the machine is correctly instanciated
-ibmcloud pi instance-create $NAME --image ubuntu_2004_containerd --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --network $NETWORK --storage-type tier3 || true
+RAND_VAL=$(head -c 64 /dev/urandom | base64 | tr -dc [:alnum:] | head -c 10; echo)
+NAME="$NAME-$RAND_VAL"
+
+ID=$(ibmcloud pi instance-create $NAME --image ubuntu_2004_tier1 --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --network $NETWORK --storage-type tier1 | grep -m 1 ID | awk '{print $2}') || true
 
 # Wait it is registred
 sleep 120
-# Get PID
-ID=$(ibmcloud pi ins | grep "$NAME" | cut -d ' ' -f1)
 
 # If no ID, stop with error
 if [ -z "$ID" ]; then echo "FAIL: fail to get ID. Probably VM has not started correctly."; exit 1; fi
@@ -67,7 +76,7 @@ while [ $i -lt $TIMEOUT ] && [ -z "$(ibmcloud pi in $ID | grep 'External Address
   sleep 60
 done
 # Fail to connect
-if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; exit 1; fi
+if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; exit 1; fi
 
 IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut -d ' ' -f3)
 
@@ -96,7 +105,7 @@ if [ "$i" == "$TIMEOUT" ]; then
     sleep 60
   done
   # Fail again to connect
-  if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; exit 1; fi
+  if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; delete_vm $ID; exit 1; fi
 fi
 
 # Get test script and execute it
@@ -104,7 +113,4 @@ ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey wget https://raw.githubusercont
 ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey sudo bash test_on_powervs.sh $RUNC_FLAVOR $TEST_RUNTIME
 scp -i /etc/ssh-volume/ssh-privatekey "ubuntu@$IP:/home/containerd_test/containerd/*.xml" ${OUTPUT}
 
-# Ensure we are yet connected
-echo "" | ibmcloud login
-# Remove machine after test
-ibmcloud pi instance-delete $ID
+delete_vm $ID
