@@ -88,7 +88,7 @@ i=0
 mkdir -p ~/.ssh
 while [ $i -lt $TIMEOUT ] && ! ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey echo OK
 do
-  ssh-keyscan -t rsa $IP >> ~/.ssh/known_hosts
+  if ! ssh-keyscan -t rsa $IP >> ~/.ssh/known_hosts; then echo "keyscan failed, try again"; fi
   i=$((i+1))
   sleep 60
 done
@@ -100,7 +100,7 @@ if [ "$i" == "$TIMEOUT" ]; then
   j=0
   while [ $j -lt $TIMEOUT ] && ! ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey echo OK
   do
-    ssh-keyscan -t rsa $IP >> ~/.ssh/known_hosts
+    if ! ssh-keyscan -t rsa $IP >> ~/.ssh/known_hosts; then echo "keyscan failed, try again"; fi
     j=$((j+1))
     sleep 60
   done
