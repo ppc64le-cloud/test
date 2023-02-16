@@ -34,6 +34,15 @@ function delete_vm() {
   ibmcloud pi instance-delete $1
 }
 
+function delete_network() {
+  if [ -z $1 ]; then echo "Nothing to delete. delete_network requires the network ID as an argument."; return; fi
+
+  # Ensure we are yet connected
+  echo "" | ibmcloud login
+  # Remove network after test
+  ibmcloud pi netd $1
+}
+
 # Get options
 while [[ $# != 0 ]]; do
 	case "$1" in
@@ -51,12 +60,18 @@ done
 # Ensure key, name and network are fulfilled
 if [ -z $SSH_KEY ]; then echo "FAIL: Key not fulfilled."; usage; exit 1; fi
 if [ -z $NAME ]; then echo "FAIL: Name not fulfilled."; usage; exit 1; fi
-if [ -z $NETWORK ]; then echo "FAIL: Network not fulfilled."; usage; exit 1; fi
+# if [ -z $NETWORK ]; then echo "FAIL: Network not fulfilled."; usage; exit 1; fi
 
 # Create a machine
 # Sometime fail, but the machine is correctly instanciated
 RAND_VAL=$(head -c 64 /dev/urandom | base64 | tr -dc [:alnum:] | head -c 10; echo)
 NAME="$NAME-$RAND_VAL"
+
+# Create public network for VM
+NETNAME="prow-net-$RAND_VAL"
+NETWORK=$(ibmcloud pi netcpu $NETNAME | grep -m 1 ID | awk '{print $2}') || true
+
+if [ -z "$NETWORK" ]; then echo "FAIL: fail to configure network."; exit 1; fi
 
 ID=$(ibmcloud pi instance-create $NAME --image ubuntu_2004_tier1 --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --network $NETWORK --storage-type tier1 | grep -m 1 ID | awk '{print $2}') || true
 
@@ -76,7 +91,7 @@ while [ $i -lt $TIMEOUT ] && [ -z "$(ibmcloud pi in $ID | grep 'External Address
   sleep 60
 done
 # Fail to connect
-if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; exit 1; fi
+if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; delete_network $NETWORK; exit 1; fi
 
 IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut -d ' ' -f3)
 
@@ -105,7 +120,7 @@ if [ "$i" == "$TIMEOUT" ]; then
     sleep 60
   done
   # Fail again to connect
-  if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; delete_vm $ID; exit 1; fi
+  if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; delete_vm $ID; delete_network $NETWORK; exit 1; fi
 fi
 
 # Get test script and execute it
@@ -114,3 +129,4 @@ ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey sudo bash test_on_powervs.sh $R
 scp -i /etc/ssh-volume/ssh-privatekey "ubuntu@$IP:/home/containerd_test/containerd/*.xml" ${OUTPUT}
 
 delete_vm $ID
+delete_network $NETWORK
