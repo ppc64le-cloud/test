@@ -90,7 +90,7 @@ while [ $i -lt $TIMEOUT ] && [ -z "$(ibmcloud pi in $ID | grep 'External Address
   sleep 60
 done
 # Fail to connect
-if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; delete_network $NETWORK; exit 1; fi
+if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; sleep 120; delete_network $NETWORK; exit 1; fi
 
 IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut -d ' ' -f3)
 
@@ -119,7 +119,7 @@ if [ "$i" == "$TIMEOUT" ]; then
     sleep 60
   done
   # Fail again to connect
-  if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; delete_vm $ID; delete_network $NETWORK; exit 1; fi
+  if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; delete_vm $ID; sleep 120; delete_network $NETWORK; exit 1; fi
 fi
 
 # Get test script and execute it
