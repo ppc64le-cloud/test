@@ -60,7 +60,6 @@ done
 # Ensure key, name and network are fulfilled
 if [ -z $SSH_KEY ]; then echo "FAIL: Key not fulfilled."; usage; exit 1; fi
 if [ -z $NAME ]; then echo "FAIL: Name not fulfilled."; usage; exit 1; fi
-# if [ -z $NETWORK ]; then echo "FAIL: Network not fulfilled."; usage; exit 1; fi
 
 # Create a machine
 # Sometime fail, but the machine is correctly instanciated
