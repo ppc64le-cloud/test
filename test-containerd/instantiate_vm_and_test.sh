@@ -128,4 +128,5 @@ ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey sudo bash test_on_powervs.sh $R
 scp -i /etc/ssh-volume/ssh-privatekey "ubuntu@$IP:/home/containerd_test/containerd/*.xml" ${OUTPUT}
 
 delete_vm $ID
+sleep 120
 delete_network $NETWORK
