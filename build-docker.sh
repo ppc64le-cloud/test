@@ -14,6 +14,9 @@ checkDirectory() {
   if ! test -d $1
   then
     mkdir $1
+    if [[ $? -ne 0 ]]; then
+      exit 1
+    fi
     echo "$1 created"
   else
     echo "$1 already created"
