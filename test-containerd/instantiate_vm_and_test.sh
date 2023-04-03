@@ -110,6 +110,7 @@ done
 if [ "$i" == "$TIMEOUT" ]; then
   echo "Fail to get IP. Rebooting."
   ibmcloud pi insrb $ID
+  sleep 360
   # And try to connect again
   j=0
   while [ $j -lt $TIMEOUT ] && ! ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey echo OK
