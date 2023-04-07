@@ -7,7 +7,8 @@ set -o allexport
 source env.list
 
 #If DOCKER_BUILD is set to 1, build Docker, otherwise don't
-if [ $DOCKER_BUILD == 0 ]; then
+if [[ ${DOCKER_BUILD} == 0 ]]; then
+  echo "DOCKER_BUILD is set to 0. Skipping building of docker packages."
   exit 0
 fi
 NCPUs=`grep processor /proc/cpuinfo | wc -l`
