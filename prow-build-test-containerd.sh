@@ -40,6 +40,11 @@ ${PATH_SCRIPTS}/build-containerd.sh
 exit_code_build=$?
 echo "Exit code build : ${exit_code_build}"
 
+if [[ ${DOCKER_BUILD} == 0 ]]; then
+  echo "INFO: Skipping tests as docker packages have not been built."
+  exit 0
+fi
+
 # Test the packages
 echo "*** * Tests * ***"
 ${PATH_SCRIPTS}/test.sh
