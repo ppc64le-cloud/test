@@ -47,6 +47,11 @@ then
     exit 1
 fi
 
+#Docker tests require containerd packages to be built.
+if [[ ${CONTAINERD_BUILD} == 0 ]];then
+    echo "CONTAINERD_BUILD is set to 0. Skipping tests as containerd was not built."
+    exit 0
+fi
 
 echo "Triggering the next prow job using git commit"
 TRACKING_REPO=${REPO_OWNER}/${REPO_NAME}
