@@ -41,6 +41,7 @@ function delete_network() {
   echo "" | ibmcloud login
   # Remove network after test
   ibmcloud pi netd $1
+  return $?
 }
 
 # Get options
@@ -130,4 +131,11 @@ scp -i /etc/ssh-volume/ssh-privatekey "ubuntu@$IP:/home/containerd_test/containe
 
 delete_vm $ID
 sleep 120
-delete_network $NETWORK
+
+TIMEOUT=10
+i=0
+while [ "$i" -lt "$TIMEOUT" ] &&  ! delete_network $NETWORK; do
+  echo "Failed to delete network"
+  i=$((i+1))
+  sleep 60
+done
