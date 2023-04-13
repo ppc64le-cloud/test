@@ -31,15 +31,22 @@ echo "Nb of test logs : ${NB_TEST_LOGS}"
 
 
 DISTROS=$(eval "echo $DEBS $RPMS | tr '-' '_'")
-
 if [[ "$TEST_MODE" = "local" ]]; then
   DISTROS+=" alpine"
 else
   echo "Skip test static for TEST_MODE: $TEST_MODE"
 fi
-
 echo "List of distros : ${DISTROS}"
 NB_DISTROS=$(eval "echo ${DISTROS} | wc -w")
+
+# Reduce count of expected successful builds by one for each end of life 
+# distribution encountered, as end of life distributions will not be built successfully.
+for EXCLUSION in "${EXCLUSIONS[@]}"; do
+        echo ${DISTROS} | grep -i "${EXCLUSION}"
+               if [[ $? == 0 ]]; then
+                       NB_DISTROS=$(( $NB_DISTROS - 1 ))
+                fi
+done
 echo "Nb of distros : ${NB_DISTROS}"
 
 if [[ ${NB_BUILD_LOGS} == ${NB_DISTROS} ]] && [[ ${NB_TEST_LOGS} == ${NB_DISTROS} ]]
