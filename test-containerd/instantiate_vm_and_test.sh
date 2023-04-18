@@ -101,7 +101,7 @@ sleep 360
 TIMEOUT=10
 i=0
 mkdir -p ~/.ssh
-while [ $i -lt $TIMEOUT ] && ! ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey echo OK
+while [ $i -lt $TIMEOUT ] && ! ssh -vvv -i /etc/ssh-volume/ssh-privatekey ubuntu@$IP echo OK
 do
   if ! ssh-keyscan -t rsa $IP >> ~/.ssh/known_hosts; then echo "keyscan failed, try again"; fi
   i=$((i+1))
@@ -114,7 +114,7 @@ if [ "$i" == "$TIMEOUT" ]; then
   sleep 360
   # And try to connect again
   j=0
-  while [ $j -lt $TIMEOUT ] && ! ssh ubuntu@$IP -i /etc/ssh-volume/ssh-privatekey echo OK
+  while [ $j -lt $TIMEOUT ] && ! ssh -vvv -i /etc/ssh-volume/ssh-privatekey ubuntu@$IP echo OK
   do
     if ! ssh-keyscan -t rsa $IP >> ~/.ssh/known_hosts; then echo "keyscan failed, try again"; fi
     j=$((j+1))
