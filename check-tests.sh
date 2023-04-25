@@ -47,8 +47,13 @@ for EXCLUSION in "${EXCLUSIONS[@]}"; do
                        NB_DISTROS=$(( $NB_DISTROS - 1 ))
                 fi
 done
-echo "Nb of distros : ${NB_DISTROS}"
 
+# Alpine build is tested only during local tests.
+if [[ "$TEST_MODE" = "local" ]]; then
+  NB_DISTROS=$(( $NB_DISTROS + 1 ))
+fi
+
+echo "Nb of distros : ${NB_DISTROS}"
 if [[ ${NB_BUILD_LOGS} == ${NB_DISTROS} ]] && [[ ${NB_TEST_LOGS} == ${NB_DISTROS} ]]
 then
     echo "~ Check the file ~"
