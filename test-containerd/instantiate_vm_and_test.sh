@@ -34,6 +34,7 @@ function delete_vm() {
   ibmcloud pi instance-delete $1
 }
 
+# When calling delete_network, wrap in a conditional to prevent early return from set -e
 function delete_network() {
   if [ -z $1 ]; then echo "Nothing to delete. delete_network requires the network ID as an argument."; return; fi
 
@@ -41,11 +42,20 @@ function delete_network() {
   echo "" | ibmcloud login
   # Remove network after test
   NET_DEL_TIMEOUT=10
+  NET_DEL_EXIT=""
   i=0
-  while [ "$i" -lt "$NET_DEL_TIMEOUT" ] &&  ! ibmcloud pi netd $1; do
+  while [ "$i" -lt "$NET_DEL_TIMEOUT" ]; do
+    ibmcloud pi netd $1
+    NET_DEL_EXIT=$?
+    if [ $NET_DEL_EXIT -eq 0 ]; then
+      return $NET_DEL_EXIT
+    fi
     i=$((i+1))
     sleep 60
   done
+
+  echo "Network delete failed with return code $NET_DEL_EXIT"
+  return $NET_DEL_EXIT
 }
 
 # Get options
@@ -95,7 +105,7 @@ while [ $i -lt $TIMEOUT ] && [ -z "$(ibmcloud pi in $ID | grep 'External Address
   sleep 60
 done
 # Fail to connect
-if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; sleep 120; delete_network $NETWORK; exit 1; fi
+if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; sleep 120; if ! delete_network $NETWORK; then exit 2; fi; exit 1; fi
 
 IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut -d ' ' -f3)
 
@@ -125,7 +135,7 @@ if [ "$i" == "$TIMEOUT" ]; then
     sleep 60
   done
   # Fail again to connect
-  # if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; delete_vm $ID; sleep 120; delete_network $NETWORK; exit 1; fi
+  # if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; delete_vm $ID; sleep 120; if ! delete_network $NETWORK; then exit 2; fi; exit 1; fi
   if [ "$j" == "$TIMEOUT" ]; then echo "FAIL: fail to connect to the VM" ; exit 1; fi
 fi
 
@@ -136,5 +146,7 @@ scp -i /etc/ssh-volume/ssh-privatekey "ubuntu@$IP:/home/containerd_test/containe
 
 delete_vm $ID
 sleep 120
-delete_network $NETWORK
+if ! delete_network $NETWORK; then
+  exit 2;
+fi
 
