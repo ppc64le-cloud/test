@@ -1,23 +1,24 @@
-# Scripts for the prow job periodic-dind-build
+# Scripts for Docker-CE and containerd build and test prow jobs
 
-The goal of these scripts and the two associated prow jobs is to automate the process of building the docker-ce and containerd packages (as well as the static binaries) for ppc64le and of testing them. The packages would then be shared with the Docker team and be available on the https://download.docker.com package repositories.
+This repository contains the scripts called by the Docker-CE and containerd build and test prow jobs in https://github.com/ppc64le-cloud/test-infra repository.
+
+The goal of these scripts and the two associated prow jobs is to automate the process of building the docker-ce and containerd packages for ppc64le and of testing them. The packages would then be shared with the Docker team and be available on the https://download.docker.com package repositories.
 
 To build these packages, we use the [docker-ce-packaging](https://github.com/docker/docker-ce-packaging) and the [containerd-packaging](https://github.com/docker/containerd-packaging/) repositories.
 
-For now, this process is semi-automated.
+The corresponding prow jobs are:
+1. postsubmit-build-docker
+2. postsubmit-build-test-containerd
+3. postsubmit-test-docker-staging
+4. postsubmit-test-docker-release
 
-## Prow jobs
-
-At the beginning, there was only one periodic prow job. However, it was taking too long to build the docker and containerd packages and exceeded the 2-hour timeout. It was taking a little bit more than 3 hours. We first worked on a periodic prow job because of the lack of tags on the [docker-ce-packaging](https://github.com/docker/docker-ce-packaging) repository and of webhooks to this repository. 
-For the moment, it is a semi-automated process, since we still need to manually edit the env.list file with the versions and the hash commits.
-
-The prow job was then split into two postsubmit prow jobs. 
-1. First prow job : [postsubmit-build-docker.yaml](https://github.com/florencepascual/test-infra/blob/postsubmit-docker-build/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-docker.yaml)
+For now, this process is semi-automated, since we still need to manually edit the env.list file with the versions and the hash commits.
+1. First prow job : [postsubmit-build-docker.yaml](https://github.com/ppc64le-cloud/test-infra/blob/master/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-docker.yaml#L2:L59)
 
 This postsubmit prow job is triggered by the editing of the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list). This file contains the information we need to build the packages : 
 - DOCKER_VERS : latest version of docker, that we want to build
 - DOCKER_PACKAGING_REF : commit associated to the latest version of docker
-- CONTAINERD_BUILD : if set to 1, it means that a new containerd version has been released in the 1.4 branch and that we have not built it yet ; if set to 0, it means that we have already built it in a previous prow job and that we do not need to build it again (we will still check that no new distribution has been added in the meantime).
+- CONTAINERD_BUILD : if set to 1, it means that a new containerd version has been released that we have not built it yet ; if set to 0, it means that we have already built it in a previous prow job and that we do not need to build it again (we will still verify that no new distribution has been added).
 - CONTAINERD_VERS : latest version of containerd
 - CONTAINERD_PACKAGING_REF : commit associated to the latest version of containerd
 - RUNC_VERS : runc version used to build the static packages
@@ -25,21 +26,21 @@ This postsubmit prow job is triggered by the editing of the [env.list](https://g
 This prow job builds the dynamic docker packages and then pushes them to our internal COS bucket, before creating the file 'env/date.list' which contains the current date (timestamp). We use the date in the directory where we store the docker packages in the COS bucket, so that we don't confuse the different builds.
 
 1. [Start the docker daemon](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L20:L22)
-2. [Access to the internal COS Bucket and set up the environmental variables](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L29:L34)
-3. [Build the dynamic and static docker packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L36:L40)
+2. [Access to the internal COS Bucket and set up the environmental variables](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L25:L26)
+3. [Build the dynamic and static docker packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L31:L35)
 4. [Push to the github repository the timestamp content in to the job/postsubmit-build-docker file from the prow-job-tracking branch](https://github.com/ppc64le-cloud/docker-ce-build/blob/prow-job-tracking/job/postsubmit-build-docker)
 
-2. Second prow job : [postsubmit-build-container.yaml](https://github.com/florencepascual/test-infra/blob/postsubmit-docker-build/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-containerd.yaml)
+2. Second prow job : [postsubmit-build-test-containerd.yaml](https://github.com/ppc64le-cloud/test-infra/blob/master/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-docker.yaml#L61:L131)
 
 This postsubmit prow job is triggered by the editing of the [job/postsubmit-build-docker](https://github.com/ppc64le-cloud/docker-ce-build/blob/prow-job-tracking/job/postsubmit-build-docker), which was edited at the end of the first prow job.
 This prow job builds the dynamic containerd packages (if CONTAINERD_BUILD is set to 1 in the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list)), the static packages, and tests all packages.
 
-1. [Start the docker daemon](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L23:L25)
-2. [Access to the internal COS Bucket and set up the environmental variables](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L34)
+1. [Start the docker daemon](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L23)
+2. [Access to the internal COS Bucket and set up the environmental variables](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L27:L30)
 3. [Get the dockertest and containerd directories if CONTAINERD_BUILD=0 from the COS bucket](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L35)
-4. [Build the dynamic containerd packages if CONTAINERD_BUILD=1 and the static packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L42:L46)
-5. [Test the dynamic and static packages and check if there are any errors](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L48:L58)
-6. [Push to the COS bucket shared with the Docker team the docker and containerd packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-docker.sh#L63:L65)
+4. [Build the containerd packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L37:L41)
+5. [Test the dynamic and static packages and check if there are any errors](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L48:L58)
+6. [Push to the COS bucket shared with the Docker team the docker and containerd packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L80:83)
 
 ### The 9 scripts in detail
 - [trigger-prow-job-from-git.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/trigger-prow-job-from-git.sh)
@@ -67,7 +68,7 @@ It also gets the latest containerd directory in the COS bucket, if the latest ve
 
 - [build-docker.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/build-docker.sh)
 
-This script builds the version of the dynamic docker packages, which is specified in the [env.list](https://github.com/florencepascual/docker-ce-build/blob/feature-optimising-builds-task/env/env.list).
+This script builds the version of the dynamic docker packages, which is specified in the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list).
 We build in parallel to gain some time. We build 4 distributions at the same time.
 After each package successfully built, we push the package to our internal COS bucket, to ensure that we have them stored in case the prow job fails before finishing.
 
@@ -76,10 +77,6 @@ After each package successfully built, we push the package to our internal COS b
 This script builds the version of the dynamic docker packages, which is specified in the [env.list](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/env/env.list) and the static packages. As already mentionned, it only builds the containerd packages if CONTAINERD_BUILD is set to 1. 
 We cannot build the packages in parallel, due to a ``git`` command in the Makefile.
 As for the **build-docker.sh**, the packages are pushed to the internal COS bucket.
-
-- [build-static.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/build-static.sh)
-
-This script builds the static binaries and rename them (removes the version and adds ppc64le). It should be run in a container. The image of the container is the same image used as the basis of the prow jobs : [quay.io/powercloud/docker-ce-build](https://quay.io/repository/powercloud/docker-ce-build).
 
 - [test.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/test.sh)
 
@@ -253,7 +250,7 @@ On the x86 machine :
 export CONFIG_PATH="$(pwd)/test-infra/config/prow/config.yaml"
 export JOB_CONFIG_PATH="$(pwd)/test-infra/config/jobs/periodic/docker-in-docker/periodic-build-docker.yaml"
 
-./test-infra/hack/test-pj.sh ${JOB_NAME}
+./test-infra/hack/test-pj.sh -j ${JOB_NAME}
 # The job name is specified in your yaml.
 ```
 #### Things to know when running a prow job against a ppc64le cluster :
