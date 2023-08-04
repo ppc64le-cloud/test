@@ -258,4 +258,4 @@ export JOB_CONFIG_PATH="$(pwd)/test-infra/config/jobs/periodic/docker-in-docker/
 - If you don't need it and you are asked about **Volume "ssh-keys-bot-ssh-secret"**, answer empty, or you can remove these lines from the [config.yaml](https://github.com/ppc64le-cloud/test-infra/blob/master/config/prow/config.yaml#L77:L78).
 - In the [test-pj.sh](https://github.com/ppc64le-cloud/test-infra/blob/master/hack/test-pj.sh#L16), the **--local** flag specifies the local directory in which the logs will be stored. If you want it to be pushed to a COS bucket or if you want the logs to be displayed in the UI, you need to remove the **--local** flag and the directory specified afterwards.
 - Namespace : test-pods (namespace where to test the prow jobs)
-- The [prow UI](https://prow.ppc64le-cloud.org/) and the [job-history of my prow job postsubmit-build-docker](https://prow.ppc64le-cloud.org/job-history/s3/prow-logs/logs/postsubmit-build-docker)
+- The [prow UI](https://prow.ppc64le-cloud.cis.ibm.net/) and the [job-history of my prow job postsubmit-build-docker](https://prow.ppc64le-cloud.cis.ibm.net/job-history/s3/prow-logs/logs/postsubmit-build-docker)
