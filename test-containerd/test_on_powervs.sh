@@ -3,6 +3,7 @@
 set -ux
 
 CRUN_VERSION=1.4.4
+GO_VERSION=1.21.0
 
 RUNC_FLAVOR=$1
 TEST_RUNTIME=$2
@@ -10,6 +11,10 @@ TEST_RUNTIME=$2
 cd /home/containerd_test
 cd containerd/
 git pull
+
+# Ensure Go is up to date
+curl -L -o /home/ubuntu/go${GO_VERSION}.linux-ppc64le.tar.gz https://go.dev/dl/go${GO_VERSION}.linux-ppc64le.tar.gz
+rm -rf /usr/local/go && tar -C /usr/local -xzf /home/ubuntu/go${GO_VERSION}.linux-ppc64le.tar.gz
 
 # To syncronize gotestsum
 go mod vendor
