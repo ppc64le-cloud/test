@@ -89,7 +89,7 @@ NETWORK=$(ibmcloud pi netcpu $NETNAME --dns-servers "9.9.9.9" | grep -m 1 ID | a
 
 if [ -z "$NETWORK" ]; then echo "FAIL: fail to configure network."; exit 1; fi
 
-ID=$(ibmcloud pi instance-create $NAME --image ubuntu_2004_tier1 --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --network $NETWORK --storage-type tier1 | grep -m 1 ID | awk '{print $2}') || true
+ID=$(ibmcloud pi instance-create $NAME --image ubuntu_2204_tier1 --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --network $NETWORK --storage-type tier1 | grep -m 1 ID | awk '{print $2}') || true
 
 # Wait it is registred
 sleep 120
