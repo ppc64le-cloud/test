@@ -22,3 +22,6 @@ else
     fi
     echo "The env.list has been copied and the list of distributions has been generated and added to env.list."
 fi
+
+# Clone the moby repository
+git clone https://github.com/moby/moby.git
