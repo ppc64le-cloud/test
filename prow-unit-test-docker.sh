@@ -21,3 +21,6 @@ source "ci/env.list"
 
 echo "*** Build dev image ***"
 chmod ug+x ${PATH_SCRIPTS}/build-dev-image.sh && ${PATH_SCRIPTS}/build-dev-image.sh
+
+echo "*** Run unit tests ***"
+chmod ug+x ${PATH_SCRIPTS}/unit-tests.sh && ${PATH_SCRIPTS}/unit-tests.sh
