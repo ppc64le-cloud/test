@@ -40,14 +40,14 @@ echo "~~ Building static binaries ~~"
 pushd docker-ce-packaging/static
 
 echo "      make static-linux"
-echo "           DOCKER_REF    : ${DOCKER_REF}"
-echo "           CONTAINERD_REF: ${CONTAINERD_REF}"
+echo "           DOCKER_TAG    : ${DOCKER_TAG}"
+echo "           CONTAINERD_TAG: ${CONTAINERD_TAG}"
 echo "           RUNC_VERS     : ${RUNC_VERS}"
 DEBUG="-d"
 echo "           DEBUG         : ${DEBUG}"
 
 # Launch the build:
-VERSION=${DOCKER_REF} CONTAINERD_VERSION=${CONTAINERD_REF} RUNC_VERSION=${RUNC_VERS} make ${DEBUG} static-linux > ${DIR_LOGS}/${STATIC_LOG} 2>&1
+VERSION=${DOCKER_TAG} CONTAINERD_VERSION=${CONTAINERD_TAG} RUNC_VERSION=${RUNC_VERS} make ${DEBUG} static-linux > ${DIR_LOGS}/${STATIC_LOG} 2>&1
 RC=$?
 
 if [[ $RC -ne 0 ]]

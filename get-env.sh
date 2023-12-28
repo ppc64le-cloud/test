@@ -1,8 +1,8 @@
 #!/bin/bash
 # Script to get the env.list file and to generate the list of distros
-# The env.list would contain the DOCKER_REF, the DOCKER_PACKAGING_REF, which is the commit associated to the version of docker,
+# The env.list would contain the DOCKER_TAG, the DOCKER_CLI hash, the DOCKER_ENGINE hash, the DOCKER_PACKAGING_HASH, which is the commit associated to the version of docker,
 # CONTAINERD_BUILD, which is set to 1 if there has been a new version of containerd released,
-# CONTAINERD_REF, CONTAINERD_PACKAGING_REF which is the commit associated to the version of containerd,
+# CONTAINERD_TAG, CONTAINERD_PACKAGING_HASH which is the commit associated to the version of containerd,
 # and RUNC_VERS, containing the version of runc used to build the static packages.
 
 set -eu
@@ -41,10 +41,10 @@ mkdir docker-ce-packaging
 pushd docker-ce-packaging
 git init
 git remote add origin https://github.com/docker/docker-ce-packaging.git
-git fetch origin ${DOCKER_PACKAGING_REF}
+git fetch origin ${DOCKER_PACKAGING_HASH}
 git checkout FETCH_HEAD
 
-make REF=${DOCKER_REF} checkout
+make REF=${DOCKER_TAG} DOCKER_ENGINE_HASH=${DOCKER_ENGINE_HASH} DOCKER_CLI_HASH=${DOCKER_CLI_HASH} checkout
 popd
 
 
@@ -70,12 +70,12 @@ then
     echo "The env.list has not been generated."
     exit 1
 else
-# Check there are 6 env variables in env.list from github
-    if grep -Fq "DOCKER_REF" ${FILE_ENV} && grep -Fq "DOCKER_PACKAGING_REF" ${FILE_ENV} && grep -Fq "CONTAINERD_BUILD" ${FILE_ENV} && grep -Fq "CONTAINERD_REF" ${FILE_ENV} && grep -Fq "CONTAINERD_PACKAGING_REF" ${FILE_ENV} && grep -Fq "RUNC_VERS" ${FILE_ENV}
+# Check there are 8 env variables in env.list from github
+    if grep -Fq "DOCKER_TAG" ${FILE_ENV} && grep -Fq "DOCKER_CLI_HASH" && grep -Fq "DOCKER_ENGINE_HASH" ${FILE_ENV} && grep -Fq "DOCKER_PACKAGING_HASH" ${FILE_ENV} && grep -Fq "CONTAINERD_BUILD" ${FILE_ENV} && grep -Fq "CONTAINERD_HASH" ${FILE_ENV} && grep -Fq "CONTAINERD_TAG" ${FILE_ENV} && grep -Fq "CONTAINERD_PACKAGING_HASH" ${FILE_ENV} && grep -Fq "RUNC_VERS" ${FILE_ENV}
     then
-        echo "DOCKER_REF : ${DOCKER_REF}, DOCKER_PACKAGING_REF : ${DOCKER_PACKAGING_REF}, CONTAINERD_BUILD : ${CONTAINERD_BUILD}, CONTAINERD_REF : ${CONTAINERD_REF}, CONTAINERD_PACKAGING_REF : ${CONTAINERD_PACKAGING_REF} and RUNC_VERS :${RUNC_VERS} are in env.list."
+        echo "DOCKER_TAG : ${DOCKER_TAG}, DOCKER_CLI_HASH : ${DOCKER_CLI_HASH}, DOCKER_ENGINE_HASH : ${DOCKER_ENGINE_HASH}, DOCKER_PACKAGING_HASH : ${DOCKER_PACKAGING_HASH}, CONTAINERD_BUILD : ${CONTAINERD_BUILD}, CONTAINERD_HASH : ${CONTAINERD_HASH}, CONTAINERD_TAG : ${CONTAINERD_TAG}, CONTAINERD_PACKAGING_HASH : ${CONTAINERD_PACKAGING_HASH} and RUNC_VERS :${RUNC_VERS} are in env.list."
     else
-        echo "DOCKER_REF, DOCKER_PACKAGING_REF, CONTAINERD_BUILD, CONTAINERD_REF, CONTAINERD_PACKAGING_REF and/or RUNC_VERS are not in env.list."
+        echo "DOCKER_TAG, DOCKER_CLI_HASH, DOCKER_ENGINE_HASH, DOCKER_PACKAGING_HASH, CONTAINERD_BUILD, CONTAINERD_HASH, CONTAINERD_TAG, CONTAINERD_PACKAGING_HASH and/or RUNC_VERS are not in env.list."
         cat /workspace/${FILE_ENV}
         exit 1
     fi

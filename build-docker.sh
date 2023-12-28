@@ -28,13 +28,13 @@ checkDirectory() {
   fi
 }
 
-DIR_COS_BUCKET="/mnt/s3_ppc64le-docker/prow-docker/build-docker-${DOCKER_REF}_${DATE}"
+DIR_COS_BUCKET="/mnt/s3_ppc64le-docker/prow-docker/build-docker-${DOCKER_TAG}_${DATE}"
 checkDirectory ${DIR_COS_BUCKET}
 
-DIR_DOCKER="/workspace/docker-ce-${DOCKER_REF}_${DATE}"
+DIR_DOCKER="/workspace/docker-ce-${DOCKER_TAG}_${DATE}"
 checkDirectory ${DIR_DOCKER}
 
-DIR_DOCKER_COS="${DIR_COS_BUCKET}/docker-ce-${DOCKER_REF}"
+DIR_DOCKER_COS="${DIR_COS_BUCKET}/docker-ce-${DOCKER_TAG}"
 checkDirectory ${DIR_DOCKER_COS}
 
 DIR_LOGS="/workspace/logs"
@@ -83,7 +83,7 @@ buildDocker() {
   local PACKTYPE=$2
   local PACKTYPE_TMP=${PACKTYPE,,}
   local DIR=${PACKTYPE_TMP:0:3}
-  cd /workspace/docker-ce-packaging/${DIR} && VERSION=${DOCKER_REF} make ${DIR}build/bundles-ce-${DISTRO}-ppc64le.tar.gz &> ${DIR_LOGS}/build_docker_${DISTRO}.log
+  cd /workspace/docker-ce-packaging/${DIR} && VERSION=${DOCKER_TAG} make ${DIR}build/bundles-ce-${DISTRO}-ppc64le.tar.gz &> ${DIR_LOGS}/build_docker_${DISTRO}.log
 
   # Check if the dynamic docker package has been built
   if test -f ${DIR}build/bundles-ce-${DISTRO}-ppc64le.tar.gz

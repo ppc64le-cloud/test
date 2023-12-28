@@ -55,10 +55,10 @@ testDynamicPackages() {
   local TEST_LOG="test_${DISTRO_NAME}_${DISTRO_VERS}.log"
   local TEST_JUNIT="junit-tests-${DISTRO_NAME}-${DISTRO_VERS}.xml"
   local BUILD_ARGS=""
-  local DIND_COMMIT_DEBS="${DIND_COMMIT_DEBS}"
-  local DIND_COMMIT_RPMS="${DIND_COMMIT_RPMS}"
-  local DOCKERD_COMMIT_DEBS="${DOCKERD_COMMIT_DEBS}"
-  local DOCKERD_COMMIT_RPMS="${DOCKERD_COMMIT_RPMS}"
+  local DIND_COMMIT_DEBS_HASH="${DIND_COMMIT_DEBS_HASH}"
+  local DIND_COMMIT_RPMS_HASH="${DIND_COMMIT_RPMS_HASH}"
+  local DOCKERD_COMMIT_DEBS_HASH="${DOCKERD_COMMIT_DEBS_HASH}"
+  local DOCKERD_COMMIT_RPMS_HASH="${DOCKERD_COMMIT_RPMS_HASH}"
   local TINI_VERSION="${TINI_VERSION}"
   export DISTRO_NAME
   export DISTRO_VERS
@@ -86,14 +86,14 @@ testDynamicPackages() {
     # Copy the docker-ce packages
     cp ${DIR_DOCKER}/bundles-ce-${DISTRO_NAME}-${DISTRO_VERS}-ppc64*.tar.gz .
     # Copy the containerd packages (we have two different configurations depending on the package type)
-    local CONTAINERD_REF_2=$(echo ${CONTAINERD_REF} | cut -d'v' -f2)
+    local CONTAINERD_TAG_2=$(echo ${CONTAINERD_TAG} | cut -d'v' -f2)
     if [[ ${PACKTYPE} == "DEBS" ]]
     then
       # For the debian packages, we don't want the dbgsym package
-      cp ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS}/ppc64*/containerd.io_${CONTAINERD_REF_2}*_ppc64*.deb .
+      cp ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS}/ppc64*/containerd.io_${CONTAINERD_TAG_2}*_ppc64*.deb .
     elif [[ ${PACKTYPE} == "RPMS" ]]
     then
-      cp ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS}/ppc64*/containerd.io-${CONTAINERD_REF_2}*.ppc64*.rpm .
+      cp ${DIR_CONTAINERD}/${DISTRO_NAME}/${DISTRO_VERS}/ppc64*/containerd.io-${CONTAINERD_TAG_2}*.ppc64*.rpm .
     fi
 
     # Check if we have the docker-ce and containerd packages and the Dockerfile and the test-launch.sh
@@ -107,9 +107,9 @@ testDynamicPackages() {
 
 # Pass in the appropriate commits for DinD and dockerd-entrypoint.sh
   if [[ ${PACKTYPE} == "DEBS" ]];then 
-      BUILD_ARGS+=" --build-arg DIND_COMMIT=${DIND_COMMIT_DEBS} --build-arg DOCKERD_COMMIT=${DOCKERD_COMMIT_DEBS}"
+      BUILD_ARGS+=" --build-arg DIND_COMMIT=${DIND_COMMIT_DEBS_HASH} --build-arg DOCKERD_COMMIT=${DOCKERD_COMMIT_DEBS_HASH}"
   elif [[ ${PACKTYPE} == "RPMS" ]];then
-      BUILD_ARGS+=" --build-arg DIND_COMMIT=${DIND_COMMIT_RPMS} --build-arg DOCKERD_COMMIT=${DOCKERD_COMMIT_RPMS} --build-arg TINI_VERSION=${TINI_VERSION}"
+      BUILD_ARGS+=" --build-arg DIND_COMMIT=${DIND_COMMIT_RPMS_HASH} --build-arg DOCKERD_COMMIT=${DOCKERD_COMMIT_RPMS_HASH} --build-arg TINI_VERSION=${TINI_VERSION}"
   fi
 
   echo "### # Building the test image: ${IMAGE_NAME} # ###"
@@ -374,12 +374,12 @@ DIR_TEST="/workspace/tests"
 export DIR_TEST
 checkDirectory ${DIR_TEST}
 
-DIR_DOCKER="/workspace/docker-ce-${DOCKER_REF}_${DATE}"
-DIR_CONTAINERD="/workspace/containerd-${CONTAINERD_REF}_${DATE}"
+DIR_DOCKER="/workspace/docker-ce-${DOCKER_TAG}_${DATE}"
+DIR_CONTAINERD="/workspace/containerd-${CONTAINERD_TAG}_${DATE}"
 
 PATH_DOCKERFILE="${PATH_SCRIPTS}/test"
 
-DIR_COS_BUCKET="/mnt/s3_ppc64le-docker/prow-docker/build-docker-${DOCKER_REF}_${DATE}"
+DIR_COS_BUCKET="/mnt/s3_ppc64le-docker/prow-docker/build-docker-${DOCKER_TAG}_${DATE}"
 
 DIR_TEST_COS="${DIR_COS_BUCKET}/tests"
 checkDirectory ${DIR_TEST_COS}
