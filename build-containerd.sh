@@ -20,14 +20,14 @@ checkDirectory() {
   fi
 }
 
-DIR_COS_BUCKET="/mnt/s3_ppc64le-docker/prow-docker/build-docker-${DOCKER_REF}_${DATE}"
+DIR_COS_BUCKET="/mnt/s3_ppc64le-docker/prow-docker/build-docker-${DOCKER_TAG}_${DATE}"
 checkDirectory ${DIR_COS_BUCKET}
 
 if [[ ${CONTAINERD_BUILD} != "0" ]]
 then
-  DIR_CONTAINERD="/workspace/containerd-${CONTAINERD_REF}_${DATE}"
+  DIR_CONTAINERD="/workspace/containerd-${CONTAINERD_TAG}_${DATE}"
   checkDirectory ${DIR_CONTAINERD}
-  DIR_CONTAINERD_COS="${DIR_COS_BUCKET}/containerd-${CONTAINERD_REF}"
+  DIR_CONTAINERD_COS="${DIR_COS_BUCKET}/containerd-${CONTAINERD_TAG}"
   checkDirectory ${DIR_CONTAINERD_COS}
 fi
 
@@ -75,7 +75,7 @@ buildContainerd() {
     TARGET="quay.io/centos/centos:stream9"
   fi
 
-  local MAKE_OPTS="REF=${CONTAINERD_REF}"
+  local MAKE_OPTS="REF=${CONTAINERD_TAG}"
   if [[ ! -z "${CONTAINERD_GO_VERSION}" ]]
   then
     MAKE_OPTS+=" GOLANG_VERSION=${CONTAINERD_GO_VERSION}"
@@ -138,16 +138,16 @@ then
   cd containerd-packaging-ref
   git init
   git remote add origin https://github.com/docker/containerd-packaging.git
-  git fetch origin ${CONTAINERD_PACKAGING_REF}
+  git fetch origin ${CONTAINERD_PACKAGING_HASH}
   git checkout FETCH_HEAD
 
 
-  if [[ ! -z "${CONTAINERD_RUNC_REF}" ]]
+  if [[ ! -z "${CONTAINERD_RUNC_TAG}" ]]
   then
-    export RUNC_REF=${CONTAINERD_RUNC_REF}
+    export RUNC_REF=${CONTAINERD_RUNC_TAG}
   fi
 
-  make REF=${CONTAINERD_REF} checkout
+  make REF=${CONTAINERD_HASH} checkout
 fi
 
 before=$SECONDS
@@ -227,7 +227,7 @@ else
     # Check if the package is there for this distribution
     echo "= Check containerd ="
 
-    DIR_CONTAINERD="/workspace/containerd-${CONTAINERD_REF}_${DATE}"
+    DIR_CONTAINERD="/workspace/containerd-${CONTAINERD_TAG}_${DATE}"
 
     DISTRO_NAME="$(cut -d'-' -f1 <<<"${DISTRO}")"
     DISTRO_VERS="$(cut -d'-' -f2 <<<"${DISTRO}")"
@@ -259,9 +259,9 @@ then
     cd /workspace/containerd-packaging
     git init
     git remote add origin https://github.com/docker/containerd-packaging.git
-    git fetch origin ${CONTAINERD_PACKAGING_REF}
+    git fetch origin ${CONTAINERD_PACKAGING_HASH}
     git checkout FETCH_HEAD
-    make REF=${CONTAINERD_REF} checkout
+    make REF=${CONTAINERD_TAG} checkout
   fi
 
   while read -r line
