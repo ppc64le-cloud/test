@@ -1,21 +1,12 @@
 #!/bin/bash
 set -u
 
-# Path to the scripts
-PATH_SCRIPTS="/home/prow/go/src/github.com/${REPO_OWNER}/${REPO_NAME}"
-PATH_CI="${PATH_SCRIPTS}/upstream-master-ci"
-export PATH_CI
-export PATH_SCRIPTS
-
 echo "Prow Job to run CI tests on the Docker packages"
 
-# Go to the workdir
-cd /workspace
-echo "* Starting dockerd and waiting for it *"
-${PATH_SCRIPTS}/dockerctl.sh start
+${PWD}/dockerctl.sh start
 
 set -o allexport
-
+export PATH_CI="${PWD}/upstream-master-ci"
 # Get the env files
 echo "** Set up (env files) **"
 chmod ug+x ${PATH_CI}/get-env-ci.sh && ${PATH_CI}/get-env-ci.sh

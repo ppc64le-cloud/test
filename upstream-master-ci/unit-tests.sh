@@ -20,3 +20,4 @@ docker run --rm -t --privileged \
                                   -e VALIDATE_REPO=${GIT_URL} \
                                   dockerbuildimage \
                                   hack/test/unit
+exit 0

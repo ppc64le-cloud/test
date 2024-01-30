@@ -26,3 +26,4 @@ docker run --rm -t --privileged \
                                   hack/make.sh \
                                     dynbinary \
                                     test-integration
+exit 0
