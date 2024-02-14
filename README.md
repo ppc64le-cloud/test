@@ -12,6 +12,12 @@ The corresponding prow jobs are:
 3. postsubmit-test-docker-staging
 4. postsubmit-test-docker-release
 
+We also run the following 4 jobs to run upstream CI tests against github.com/moby/moby.
+1. periodic-config-docker
+2. periodic-build-dev-image-docker
+3. periodic-unit-test-docker
+4. periodic-integration-test-docker
+
 For now, this process is semi-automated, since we still need to manually edit the env.list file with the versions and the hash commits.
 1. First prow job : [postsubmit-build-docker.yaml](https://github.com/ppc64le-cloud/test-infra/blob/master/config/jobs/ppc64le-cloud/build-docker/postsubmit-build-docker.yaml#L2:L59)
 
@@ -43,6 +49,15 @@ This prow job builds the dynamic containerd packages (if CONTAINERD_BUILD is set
 4. [Build the containerd packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L37:L41)
 5. [Test the dynamic and static packages and check if there are any errors](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L48:L58)
 6. [Push to the COS bucket shared with the Docker team the docker and containerd packages](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-test-containerd.sh#L80:83)
+
+2. Third set of prow jobs for upstream CI: [periodic-ci-docker.yaml](https://github.com/ppc64le-cloud/test-infra/blob/master/config/jobs/ppc64le-cloud/build-docker/periodic-ci-docker.yaml)
+
+This periodic prow job is triggered once a day. It runs test against the [moby repository](https://github.com/moby/moby/). The 4 jobs in the file trigger the following scripts.
+
+1. [Check the kernel configuration](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-info-docker.sh)
+2. [Build the dev image from the moby repository](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-build-dev-image.sh)
+3. [Run unit tests defined in moby/hack/test/unit](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-unit-test-docker.sh)
+3. [Run integration tests defined in moby/Makefile](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/prow-integration-test-docker.sh)
 
 ### The 9 scripts in detail
 - [trigger-prow-job-from-git.sh](https://github.com/ppc64le-cloud/docker-ce-build/blob/main/trigger-prow-job-from-git.sh)
