@@ -5,9 +5,9 @@
 
 FROM debian:bookworm
 
-ENV CONTAINERD_VERSION=1.6.21-1
+ENV CONTAINERD_VERSION=1.6.28-1
 
-ENV DOCKER_VERSION=24.0.2-1
+ENV DOCKER_VERSION=25.0.3-1
 
 WORKDIR /workspace
 RUN mkdir -p /workspace
@@ -54,7 +54,7 @@ curl https://download.docker.com/linux/debian/dists/bookworm/pool/stable/amd64/d
 curl https://download.docker.com/linux/debian/dists/bookworm/pool/stable/ppc64el/containerd.io_${CONTAINERD_VERSION}_ppc64el.deb -o /workspace/tmp/containerd.io_${CONTAINERD_VERSION}_ppc64el.deb; \
 curl https://download.docker.com/linux/debian/dists/bookworm/pool/stable/ppc64el/docker-ce-cli_${DOCKER_VERSION}~debian.12~bookworm_ppc64el.deb -o /workspace/tmp/docker-ce-cli_${DOCKER_VERSION}~debian.12~bookworm_ppc64el.deb; \
 curl https://download.docker.com/linux/debian/dists/bookworm/pool/stable/ppc64el/docker-ce_${DOCKER_VERSION}~debian.12~bookworm_ppc64el.deb -o /workspace/tmp/docker-ce_${DOCKER_VERSION}~debian.12~bookworm_ppc64el.deb; \
-curl https://download.docker.com/linux/debian/dists/bookworm/pool/stable/ppc64el/docker-buildx-plugin_0.10.5-1~debian.12~bookworm_ppc64el.deb -o /workspace/tmp/docker-buildx-plugin_0.10.5-1~debian.12~bookworm_ppc64el.deb; \
+curl https://download.docker.com/linux/debian/dists/bookworm/pool/stable/ppc64el/docker-buildx-plugin_0.12.1-1~debian.12~bookworm_ppc64el.deb -o /workspace/tmp/docker-buildx-plugin_0.10.5-1~debian.12~bookworm_ppc64el.deb; \
 ;; \
     esac; \
     \
@@ -74,12 +74,12 @@ RUN set -eux; \
     echo 'dockremap:165536:65536' >> /etc/subgid
 
 # https://github.com/docker/docker/tree/master/hack/dind
-ENV DIND_COMMIT d58df1fc6c866447ce2cd129af10e5b507705624
-ENV DOCKERD_COMMIT 6964fd52030c2e6e9e0943eaac07d78c9841fbb3
+ENV DIND_COMMIT 65cfcc28ab37cb75e1560e4b4738719c07c6618e
+ENV DOCKERD_COMMIT d3e33ac3bc1eab5d436b7ab2981ba539ebbb7275
 
 RUN set -eux; \
 curl https://raw.githubusercontent.com/moby/moby/${DIND_COMMIT}/hack/dind -o /usr/local/bin/dind; \
-curl https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/24/dind/dockerd-entrypoint.sh -o /usr/local/bin/dockerd-entrypoint.sh; \
+curl https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/25/dind/dockerd-entrypoint.sh -o /usr/local/bin/dockerd-entrypoint.sh; \
 chmod +x /usr/local/bin/dind; \
     chmod +x /usr/local/bin/dockerd-entrypoint.sh; \
 cp $(which tini) "/usr/local/bin/docker-init";
