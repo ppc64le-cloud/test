@@ -1,2 +1,2 @@
-# Update this file to spawn the prow job postsubmit-test-docker-release 
+# Update this file to spawn the prow job postsubmit-test-docker-release to test Docker v25.0.4
 # Version 25.0.4 / 1.6.28 
