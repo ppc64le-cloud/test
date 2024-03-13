@@ -1,6 +1,6 @@
 # Dockerfile to test DEBS packages
 
-ARG GOLANG_VERSION=1.19.9
+ARG GOLANG_VERSION=1.20.13
 ARG DISTRO_NAME
 ARG DISTRO_VERS
 
@@ -55,17 +55,17 @@ RUN set -eux; \
         echo 'dockremap:165536:65536' >> /etc/subuid; \
         echo 'dockremap:165536:65536' >> /etc/subgid
 
-# Commit pointing to the latest Docker-in-Docker script as of May 16, 2023.
+# Commit pointing to the latest Docker-in-Docker script as of January 2024.
 # https://github.com/moby/moby/tree/master/hack/dind
-ARG DIND_COMMIT=1f32e3c95d72a29b3eaacba156ed675dba976cb5
-# Commit pointing to the latest stable Dockerd-entrypoint script as of May 16, 2023.
-# https://github.com/docker-library/docker/tree/master/23.0/dind
-ARG DOCKERD_COMMIT=a3ca225e9c0e568cf87a7b60c951b939c3964c91
+ARG DIND_COMMIT=65cfcc28ab37cb75e1560e4b4738719c07c6618e
+# Commit pointing to the latest stable Dockerd-entrypoint script as of January, 2024.
+# https://github.com/docker-library/docker/tree/master/25/dind
+ARG DOCKERD_COMMIT=d3e33ac3bc1eab5d436b7ab2981ba539ebbb7275
 
 
 RUN set -eux; \
         curl "https://raw.githubusercontent.com/moby/moby/${DIND_COMMIT}/hack/dind" -o /usr/local/bin/dind; \
-        curl "https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/23.0/dind/dockerd-entrypoint.sh" -o /usr/local/bin/dockerd-entrypoint.sh; \
+        curl "https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/25/dind/dockerd-entrypoint.sh" -o /usr/local/bin/dockerd-entrypoint.sh; \
         chmod +x /usr/local/bin/dind; \
         chmod +x /usr/local/bin/dockerd-entrypoint.sh; \
         cp $(which tini) "/usr/local/bin/docker-init"; \
