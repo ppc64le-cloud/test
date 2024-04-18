@@ -1,6 +1,6 @@
 # Dockerfile to run the staging tests
 
-ARG GOLANG_VERSION=1.20.13
+ARG GOLANG_VERSION=1.21.9
 ARG DISTRO_NAME
 ARG DISTRO_VERS
 ARG REPO_HOSTNAME=download-stage.docker.com
