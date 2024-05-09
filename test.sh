@@ -54,6 +54,8 @@ testDynamicPackages() {
   local BUILD_LOG="build_${DISTRO_NAME}_${DISTRO_VERS}.log"
   local TEST_LOG="test_${DISTRO_NAME}_${DISTRO_VERS}.log"
   local TEST_JUNIT="junit-tests-${DISTRO_NAME}-${DISTRO_VERS}.xml"
+  local ARCH="ppc64le"
+  local GO_VERSION=""
   local BUILD_ARGS=""
   local DIND_COMMIT_DEBS_HASH="${DIND_COMMIT_DEBS_HASH}"
   local DIND_COMMIT_RPMS_HASH="${DIND_COMMIT_RPMS_HASH}"
@@ -104,6 +106,15 @@ testDynamicPackages() {
       echo "ERROR: The docker-ce packages and/or the containerd packages and/or the Dockerfile is/are missing"
     fi
   fi
+
+# x86_64 corresponds to amd64 in the Go download page.
+if [[ $(uname -m) == "x86_64" || $(uname -m) == "amd64" ]]; then
+        ARCH="amd64"
+fi
+
+# Get the latest Go version depending on the architecture
+GO_VERSION="$(curl https://go.dev/VERSION?m=text | head -n1).linux-${ARCH}.tar.gz"
+BUILD_ARGS+=" --build-arg GO_VERSION=${GO_VERSION}"
 
 # Pass in the appropriate commits for DinD and dockerd-entrypoint.sh
   if [[ ${PACKTYPE} == "DEBS" ]];then 

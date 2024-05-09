@@ -1,12 +1,10 @@
 # Dockerfile to test RPMS packages
 
-ARG GOLANG_VERSION=1.21.9
 ARG DISTRO_NAME
 ARG DISTRO_VERS
 
 FROM ppc64le/$DISTRO_NAME:$DISTRO_VERS
 
-ARG GOLANG_VERSION
 ARG DISTRO_NAME
 ARG DISTRO_VERS
 
@@ -64,8 +62,10 @@ RUN set -eux; \
         popd; \
         chmod +x /usr/local/bin/test-launch.sh;
 
+ARG GO_VERSION=1.21.9
+
 RUN set -eux; \
-    url="https://storage.googleapis.com/golang/go${GOLANG_VERSION}.linux-ppc64le.tar.gz";\
+    url="https://dl.google.com/go/${GO_VERSION}";\
     curl "$url" -o go.tgz --progress-bar; \
     tar -C /usr/local -xzf go.tgz; \
     rm go.tgz; \
