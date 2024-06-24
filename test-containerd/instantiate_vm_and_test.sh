@@ -85,7 +85,7 @@ NAME="$NAME-$RAND_VAL"
 
 # Create public network for VM
 NETNAME="prow-net-$RAND_VAL"
-NETWORK=$(ibmcloud pi subnet create $NETNAME --dns-servers "9.9.9.9" | grep -m 1 ID | awk '{print $2}') || true
+NETWORK=$(ibmcloud pi subnet create $NETNAME --net-type public --dns-servers "9.9.9.9" | grep -m 1 ID | awk '{print $2}') || true
 
 if [ -z "$NETWORK" ]; then echo "FAIL: fail to configure network."; exit 1; fi
 
