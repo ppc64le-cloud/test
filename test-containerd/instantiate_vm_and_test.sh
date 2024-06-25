@@ -31,7 +31,7 @@ function delete_vm() {
   # Ensure we are yet connected
   echo "" | ibmcloud login
   # Remove machine after test
-  ibmcloud pi instance-delete $1
+  ibmcloud pi instance delete $1
 }
 
 function delete_network() {
@@ -46,7 +46,7 @@ function delete_network() {
 
   set +e
   while [ "$i" -lt "$NET_DEL_TIMEOUT" ]; do
-    ibmcloud pi netd $1
+    ibmcloud pi subnet delete $1
     NET_DEL_EXIT=$?
     if [ $NET_DEL_EXIT -eq 0 ]; then
       return $NET_DEL_EXIT
@@ -85,11 +85,11 @@ NAME="$NAME-$RAND_VAL"
 
 # Create public network for VM
 NETNAME="prow-net-$RAND_VAL"
-NETWORK=$(ibmcloud pi netcpu $NETNAME --dns-servers "9.9.9.9" | grep -m 1 ID | awk '{print $2}') || true
+NETWORK=$(ibmcloud pi subnet create $NETNAME --net-type public --dns-servers "9.9.9.9" | grep -m 1 ID | awk '{print $2}') || true
 
 if [ -z "$NETWORK" ]; then echo "FAIL: fail to configure network."; exit 1; fi
 
-ID=$(ibmcloud pi instance-create $NAME --image ubuntu_2204_tier1 --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --network $NETWORK --storage-type tier1 | grep -m 1 ID | awk '{print $2}') || true
+ID=$(ibmcloud pi instance create $NAME --image ubuntu_2204_tier1 --key-name $SSH_KEY --memory 8 --processor-type shared --processors '0.5' --subnets $NETWORK --storage-tier tier1 | grep -m 1 ID | awk '{print $2}') || true
 
 # Wait it is registred
 sleep 120
@@ -102,14 +102,14 @@ if [ -z "$ID" ]; then echo "FAIL: fail to get ID. Probably VM has not started co
 # Typical time needed: 5 to 6 minutes
 TIMEOUT=10
 i=0
-while [ $i -lt $TIMEOUT ] && [ -z "$(ibmcloud pi in $ID | grep 'External Address:')" ]; do
+while [ $i -lt $TIMEOUT ] && [ -z "$(ibmcloud pi instance get $ID | grep 'External Address:')" ]; do
   i=$((i+1))
   sleep 60
 done
 # Fail to connect
 if [ "$i" == "$TIMEOUT" ]; then echo "FAIL: fail to get IP" ; delete_vm $ID; sleep 120; delete_network $NETWORK; exit 1; fi
 
-IP=$(ibmcloud pi in $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut -d ' ' -f3)
+IP=$(ibmcloud pi instance get $ID | grep -Eo "External Address:[[:space:]]*[0-9.]+" | cut -d ' ' -f3)
 
 # Check if the server is up
 sleep 360
@@ -126,7 +126,7 @@ done
 # Fail to connect, try to reboot to bypass grub trouble
 if [ "$i" == "$TIMEOUT" ]; then
   echo "Fail to get IP. Rebooting."
-  ibmcloud pi insrb $ID
+  ibmcloud pi instance action $ID -o "hard-reboot"
   sleep 360
   # And try to connect again
   j=0
