@@ -24,6 +24,11 @@ set -o allexport
 echo "** Set up (env files) **"
 chmod ug+x ${PATH_CI}/get-env-ci.sh && ${PATH_CI}/get-env-ci.sh
 
+# Set ndots to 0, otherwise TestDNSOptions fails.
+cp /etc/resolv.conf /etc/resolv1.conf
+sed -i 's/ndots:5.*/ndots:0/g' /etc/resolv1.conf 
+cp /etc/resolv1.conf /etc/resolv.conf
+
 echo "*** Build dev image ***"
 chmod ug+x ${PATH_CI}/build-dev-image.sh && ${PATH_CI}/build-dev-image.sh
 
