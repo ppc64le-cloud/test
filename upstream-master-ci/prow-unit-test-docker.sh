@@ -13,6 +13,8 @@ if [[ -z ${ARTIFACTS} ]]; then
     echo "Setting ARTIFACTS to ${ARTIFACTS}"
     mkdir -p ${ARTIFACTS}
 fi
+# Start dockerd with ndots:0, otherwise TestDNSOptions fails.
+sed -i 's/dockerd \\/dockerd \\\n--dns-option ndots:0 \\/' /usr/local/bin/dockerd-entrypoint.sh
 
 # Go to the workdir
 echo "* Starting dockerd and waiting for it *"
@@ -23,11 +25,6 @@ set -o allexport
 # Get the env files
 echo "** Set up (env files) **"
 chmod ug+x ${PATH_CI}/get-env-ci.sh && ${PATH_CI}/get-env-ci.sh
-
-# Set ndots to 0, otherwise TestDNSOptions fails.
-cp /etc/resolv.conf /etc/resolv1.conf
-sed -i 's/ndots:5.*/ndots:0/g' /etc/resolv1.conf 
-cp /etc/resolv1.conf /etc/resolv.conf
 
 echo "*** Build dev image ***"
 chmod ug+x ${PATH_CI}/build-dev-image.sh && ${PATH_CI}/build-dev-image.sh
