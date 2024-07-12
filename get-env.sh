@@ -33,6 +33,11 @@ then
     s3fs ${COS_BUCKET_PRIVATE} ${PATH_COS}/s3_${COS_BUCKET_PRIVATE} -o url=${URL_COS_PRIVATE} -o passwd_file=${PATH_PASSWORD} -o ibm_iam_auth
     if [[ $? == 0 ]]; then
         echo "The COS bucket has been mounted."
+        if [[ $(ls ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}) ]]; then
+            echo "Mounted COS bucket is not empty"
+        else
+            echo "Mounted COS bucket is empty. There may have been an error while mounting."
+        fi
     else
         echo "The COS bucket could not be mounted."
     fi
