@@ -20,14 +20,22 @@ DISABLE_DISTRO_DISCOVERY=0
 # Mount the COS bucket if not mounted
 if ! test -d ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}
 then
+    echo "The COS bucket is not mounted."
     # Set up the s3 secret if not already configured
     if ! test -f ${PATH_PASSWORD}
     then
+        echo "The S3FS auth is not stored in PATH_PASSWORD."
         echo ":${S3_SECRET_AUTH}" > ${PATH_PASSWORD}
         chmod 600 ${PATH_PASSWORD}
     fi
     mkdir -p ${PATH_COS}/s3_${COS_BUCKET_PRIVATE}
+    echo "mkdir -p ${PATH_COS}/s3_${COS_BUCKET_PRIVATE} finished with code $?"
     s3fs ${COS_BUCKET_PRIVATE} ${PATH_COS}/s3_${COS_BUCKET_PRIVATE} -o url=${URL_COS_PRIVATE} -o passwd_file=${PATH_PASSWORD} -o ibm_iam_auth
+    if [[ $? == 0 ]]; then
+        echo "The COS bucket has been mounted."
+    else
+        echo "The COS bucket could not be mounted."
+    fi
 fi
 
 # Copy the env.list to the local /workspace
