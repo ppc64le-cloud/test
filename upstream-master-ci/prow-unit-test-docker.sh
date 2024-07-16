@@ -13,8 +13,11 @@ if [[ -z ${ARTIFACTS} ]]; then
     echo "Setting ARTIFACTS to ${ARTIFACTS}"
     mkdir -p ${ARTIFACTS}
 fi
-# Start dockerd with ndots:0, otherwise TestDNSOptions fails.
-sed -i 's/dockerd \\/dockerd \\\n--dns-option ndots:0 \\/' /usr/local/bin/dockerd-entrypoint.sh
+
+# Set ndots to 0, otherwise TestDNSOptions fails.
+cp /etc/resolv.conf /etc/resolv1.conf
+sed -i 's/ndots:5.*/ndots:0/g' /etc/resolv1.conf 
+cp /etc/resolv1.conf /etc/resolv.conf
 
 # Go to the workdir
 echo "* Starting dockerd and waiting for it *"
