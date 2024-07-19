@@ -44,14 +44,14 @@ RUN set -eux; \
 ARG DIND_COMMIT=65cfcc28ab37cb75e1560e4b4738719c07c6618e
 # Commit pointing to the latest stable Dockerd-entrypoint script as of January, 2024.
 # https://github.com/docker-library/docker/tree/master/25/dind
-ARG DOCKERD_COMMIT=d3e33ac3bc1eab5d436b7ab2981ba539ebbb7275
+ARG DOCKERD_COMMIT=b317cabfb873fef32ac8cad0cd58d6e6c32a63a4
 ARG TINI_VERSION=v0.19.0
 
 COPY test-launch.sh /usr/local/bin/test-launch.sh
 
 RUN set -eux; \
         curl "https://raw.githubusercontent.com/moby/moby/${DIND_COMMIT}/hack/dind" -o /usr/local/bin/dind; \
-        curl "https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/25/dind/dockerd-entrypoint.sh" -o /usr/local/bin/dockerd-entrypoint.sh; \
+        curl "https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/27/dind/dockerd-entrypoint.sh" -o /usr/local/bin/dockerd-entrypoint.sh; \
         chmod +x /usr/local/bin/dind; \
         chmod +x /usr/local/bin/dockerd-entrypoint.sh; \
         git clone https://github.com/krallin/tini.git "/workspace/tini"; \
@@ -63,7 +63,7 @@ RUN set -eux; \
         popd; \
         chmod +x /usr/local/bin/test-launch.sh;
 
-ARG GO_VERSION=1.21.9
+ARG GO_VERSION=1.22.5
 
 RUN set -eux; \
     url="https://dl.google.com/go/${GO_VERSION}";\
