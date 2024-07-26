@@ -53,23 +53,23 @@ RUN set -eux; \
         echo 'dockremap:165536:65536' >> /etc/subuid; \
         echo 'dockremap:165536:65536' >> /etc/subgid
 
-# Commit pointing to the latest Docker-in-Docker script as of January 2024.
+# Commit pointing to the latest Docker-in-Docker script as of July 2024.
 # https://github.com/moby/moby/tree/master/hack/dind
 ARG DIND_COMMIT=65cfcc28ab37cb75e1560e4b4738719c07c6618e
-# Commit pointing to the latest stable Dockerd-entrypoint script as of January, 2024.
-# https://github.com/docker-library/docker/tree/master/25/dind
-ARG DOCKERD_COMMIT=d3e33ac3bc1eab5d436b7ab2981ba539ebbb7275
+# Commit pointing to the latest stable Dockerd-entrypoint script as of July, 2024.
+# https://github.com/docker-library/docker/tree/master/27/dind
+ARG DOCKERD_COMMIT=b317cabfb873fef32ac8cad0cd58d6e6c32a63a4
 
 
 RUN set -eux; \
         curl "https://raw.githubusercontent.com/moby/moby/${DIND_COMMIT}/hack/dind" -o /usr/local/bin/dind; \
-        curl "https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/25/dind/dockerd-entrypoint.sh" -o /usr/local/bin/dockerd-entrypoint.sh; \
+        curl "https://raw.githubusercontent.com/docker-library/docker/${DOCKERD_COMMIT}/27/dind/dockerd-entrypoint.sh" -o /usr/local/bin/dockerd-entrypoint.sh; \
         chmod +x /usr/local/bin/dind; \
         chmod +x /usr/local/bin/dockerd-entrypoint.sh; \
         cp $(which tini) "/usr/local/bin/docker-init"; \
         chmod +x /usr/local/bin/test-launch.sh;
 
-ARG GO_VERSION=1.21.9
+ARG GO_VERSION=1.22.5
 
 RUN set -eux; \
 	url="https://dl.google.com/go/${GO_VERSION}";\
