@@ -22,11 +22,12 @@ checkDirectory ${DIR_LOGS_COS}
 
 rm -f ${DIR_LOGS_COS}/unit.log && touch ${DIR_LOGS_COS}/unit.log
 make -o build test-unit 2>&1 | tee -a ${DIR_LOGS_COS}/unit.log
-rc=$(grep "failure" ${DIR_LOGS_COS}/unit.log | awk '{print $6;}')
 cp bundles/junit-report.xml ${ARTIFACTS}
-popd
-
-if [[ $rc == 0 ]]; then
+grep "failure" ${DIR_LOGS_COS}/unit.log > /dev/null 2>&1
+if [[ $? == 1 ]]; then
+  popd
   exit 0
 fi
+
+popd
 exit 1
