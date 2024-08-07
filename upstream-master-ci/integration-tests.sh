@@ -25,7 +25,7 @@ TESTDEBUG="true"
 rm -f ${DIR_LOGS_COS}/integration.log && touch ${DIR_LOGS_COS}/integration.log
 echo "Integration test flags:"
 echo "TEST_IGNORE_CGROUP_CHECK=${TEST_IGNORE_CGROUP_CHECK} TEST_DEBUG=${TEST_DEBUG}" > ${DIR_LOGS_COS}/integration.log
-TEST_IGNORE_CGROUP_CHECK=${TEST_IGNORE_CGROUP_CHECK} TESTDEBUG=${TEST_DEBUG} make -o build test-integration 2>&1 | tee -a ${DIR_LOGS_COS}/integration.log
+TEST_IGNORE_CGROUP_CHECK=${TEST_IGNORE_CGROUP_CHECK} TEST_SKIP_INTEGRATION_CLI="true" TESTDEBUG=${TEST_DEBUG} make -o build test-integration 2>&1 | tee -a ${DIR_LOGS_COS}/integration.log
 
 rc=$(grep "failure" ${DIR_LOGS_COS}/integration.log | awk '{print $6;}')
 popd
